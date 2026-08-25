@@ -1,0 +1,7 @@
+echo .env>> .gitignore
+echo src/credentials.json>> .gitignore
+echo tcl-credentials.json>> .gitignore
+echo src/tcl-credentials.json>> .gitignore
+echo __pycache__/>> .gitignore
+echo .streamlit/secrets.toml>> .gitignore
+echo venv/>> .gitignore
