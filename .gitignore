@@ -5,3 +5,7 @@ echo src/tcl-credentials.json>> .gitignore
 echo __pycache__/>> .gitignore
 echo .streamlit/secrets.toml>> .gitignore
 echo venv/>> .gitignore
+.env
+tcl-credentials.json
+__pycache__/
+*.pyc
