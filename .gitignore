@@ -10,3 +10,4 @@ src/.ipynb_checkpoints/
 .streamlit/secrets.toml
 venv/
 .venv/
+.venv/
