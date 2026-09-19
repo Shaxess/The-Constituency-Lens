@@ -10,8 +10,6 @@ logger = logging.getLogger("TCL-Sentiment")
 # comes in and you spot terms it's missing.
 WEIGHTED_LEXICON = {
     # Strong negative - suffering/anger phrases
-    "ozo bu iwe m": -3,
-    "mmiri adighi": -3,
     "onweghi mmiri": -3,
     "anyi na-ata ahuhu": -3,
     "oke onu": -2,
@@ -86,7 +84,19 @@ def analyze(text: str):
     if model:
         try:
             result = model(text[:512])[0]
-            return {"label": result["label"], "score": result["score"], "method": "xlm-roberta", "matched_terms": []}
+            raw_label = result["label"].lower()
+            confidence = result["score"]
+            # Sign the confidence to match the lexicon's signed scale
+            # (-N to +N). Without this, a 0.87 "negative" confidence and
+            # a 0.87 "positive" confidence would average as identical,
+            # which silently corrupts every ward/issue aggregate.
+            if "neg" in raw_label:
+                signed_score = -confidence
+            elif "pos" in raw_label:
+                signed_score = confidence
+            else:
+                signed_score = 0
+            return {"label": result["label"], "score": round(signed_score, 3), "method": "xlm-roberta", "matched_terms": []}
         except Exception as e:
             logger.error(f"Transformer inference failed: {e}")
 

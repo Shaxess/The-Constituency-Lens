@@ -98,7 +98,10 @@ def _looks_like_named_accusation(text, text_lower):
     known-group list, so it will miss some names and false-positive on
     place names and sentence starts. Tune the lists as real data comes in.
     """
-    has_violent_act = any(kw in text_lower for kw in VIOLENT_ACT_KEYWORDS)
+    has_violent_act = any(
+        re.search(r"\b" + re.escape(kw) + r"\b", text_lower)
+        for kw in VIOLENT_ACT_KEYWORDS
+    )
     if not has_violent_act:
         return False, ""
 
@@ -114,11 +117,19 @@ def _looks_like_named_accusation(text, text_lower):
     # 3. Capitalised word that isn't at the start of a sentence and isn't a
     #    known place/organisation - a rough proxy for a personal name.
     known_non_names = set()
-    for kws in list(OJO_WARDS.values()) + list(OJO_ISSUES.values()):
-        known_non_names.update(k.lower() for k in kws)
+    for phrase_list in list(OJO_WARDS.values()) + list(OJO_ISSUES.values()):
+        for phrase in phrase_list:
+            known_non_names.add(phrase.lower())
+            # also add each individual word from multi-word phrases
+            # (e.g. "health center" -> "health", "center") so a
+            # capitalised word inside a known phrase isn't flagged alone.
+            for word in phrase.lower().split():
+                known_non_names.add(word)
     known_non_names.update({
         "ojo", "lagos", "nigeria", "lga", "lcda", "ward", "road", "street",
         "market", "police", "god", "state", "federal", "government",
+        "ecowas", "primary", "junction", "estate", "housing", "area",
+        "community", "residents", "chairman", "hon", "governor", "fg",
     })
 
     words = text.split()
