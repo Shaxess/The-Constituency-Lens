@@ -32,10 +32,13 @@ def add_post(text, author, source, ward_hint=""):
         "REVIEW" if political.get('needs_review') else "",
         political.get('review_reason', ""),
         ",".join(matched_terms) if matched_terms else label,
+        political.get('jurisdiction', 'lga'),
     ]
     ws.append_row(row)
     flag = " [FLAGGED FOR REVIEW: " + political['review_reason'] + "]" if political.get('needs_review') else ""
-    print(f"Saved: {political['ward']} | {language} | {political['issues']} | Score {score} ({label}) | {text[:50]}...{flag}")
+    jur = political.get('jurisdiction', 'lga')
+    jur_note = f" [{jur.upper()}]" if jur != "lga" else ""
+    print(f"Saved: {political['ward']} | {language} | {political['issues']} | Score {score} ({label}){jur_note} | {text[:50]}...{flag}")
 
 if __name__ == "__main__":
     # ward_hint uses official INEC ward names to help the tagger resolve
@@ -73,6 +76,61 @@ if __name__ == "__main__":
 
         ("those boys the pass police checked point everyday ooo, them dey even follow ajangbandi police station self",
          "Ojo Concerned Citizen", "Facebook Ojo Community", "Ward 03 Ajangbadi"),  # confirmed - "ajangbandi" is local spelling of Ajangbadi
+        
+        ("LASU condemned an alleged assault on a 300-level Nursing student at a private hostel near campus and started a disciplinary process.",
+         "LASU Students' Union", "Facebook", "Ward 05 Iba"),
+
+        ("Over 300 diploma graduates protested after LASU raised the CGPA requirement for 200-level admission from 3.0 to 3.5, excluding them; security operatives allegedly brutalized protesters.",
+         "Diploma Students (Direct Entry protesters)", "PM News Nigeria", "Ward 05 Iba"),
+
+        ("ASUU declared an indefinite strike across LASU, LASUED and LASUSTECH over an unimplemented December 2025 agreement on staff allowances and welfare.",
+         "ASUU Joint Campus Group", "Facebook", "Ward 05 Iba"),
+
+        ("Alleged over 100 LASU final-year students could not graduate due to a lecturer's unuploaded 300-level results; LASU says the matter is under investigation.",
+         "Son Of Ayo", "Legit.ng", "Ward 05 Iba"),
+
+        ("LASU English Department students reported a missing-results backlog affecting graduation; LASU later said the issue was resolved and records updated.",
+         "English Department Students", "Facebook", "Ward 05 Iba"),
+
+        ("A 300-level LASU student was reportedly killed in a hit-and-run on Igando road while fleeing a police-related disturbance; students demanded justice. Unverified, single-source report.",
+         "LASU Students (aggregated)", "Facebook", "Ward 05 Iba"),
+
+        ("LASU banned student content creation on campus after a 'bandits prank' incident; sought student opinions on the policy.",
+         "Aanuoluwapo Adeniyi", "Facebook", "Ward 05 Iba"),
+
+        ("LASU Corporate Affairs Unit issued a statement on missing results, assuring no eligible student would be delayed from graduating.",
+         "LASU Corporate Affairs Unit", "hola-info247.blogspot.com", "Ward 05 Iba"),
+
+        ("Discussion questioned regional funding equity between federal and state universities, citing LASU as an example of underfunding.",
+         "Adedamola Adetayo", "Facebook", "Ward 05 Iba"),
+
+        # --- LASU-related batch (institutional, expect jurisdiction=institutional, not LGA-actionable) ---
+        ("LASU condemned an alleged assault on a 300-level Nursing student at a private hostel near campus and started a disciplinary process.",
+         "LASU Students' Union", "Facebook", "Ward 05 Iba"),
+
+        ("Over 300 diploma graduates protested after LASU raised the CGPA requirement for 200-level admission from 3.0 to 3.5, excluding them; security operatives allegedly brutalized protesters.",
+         "Diploma Students (Direct Entry protesters)", "PM News Nigeria", "Ward 05 Iba"),
+
+        ("ASUU declared an indefinite strike across LASU, LASUED and LASUSTECH over an unimplemented December 2025 agreement on staff allowances and welfare.",
+         "ASUU Joint Campus Group", "Facebook", "Ward 05 Iba"),
+
+        ("Alleged over 100 LASU final-year students could not graduate due to a lecturer's unuploaded 300-level results; LASU says the matter is under investigation.",
+         "Son Of Ayo", "Legit.ng", "Ward 05 Iba"),
+
+        ("LASU English Department students reported a missing-results backlog affecting graduation; LASU later said the issue was resolved and records updated.",
+         "English Department Students", "Facebook", "Ward 05 Iba"),
+
+        ("A 300-level LASU student was reportedly killed in a hit-and-run on Igando road while fleeing a police-related disturbance; students demanded justice. Unverified, single-source report.",
+         "LASU Students (aggregated)", "Facebook", "Ward 05 Iba"),
+
+        ("LASU banned student content creation on campus after a 'bandits prank' incident; sought student opinions on the policy.",
+         "Aanuoluwapo Adeniyi", "Facebook", "Ward 05 Iba"),
+
+        ("LASU Corporate Affairs Unit issued a statement on missing results, assuring no eligible student would be delayed from graduating.",
+         "LASU Corporate Affairs Unit", "hola-info247.blogspot.com", "Ward 05 Iba"),
+
+        ("Discussion questioned regional funding equity between federal and state universities, citing LASU as an example of underfunding.",
+         "Adedamola Adetayo", "Facebook", "Ward 05 Iba"),
     ]
 
     for text, author, source, ward in samples:

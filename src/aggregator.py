@@ -26,10 +26,21 @@ def filter_reviewed(records):
     return clean, skipped
 
 
-def aggregate_by_ward(records):
+def aggregate_by_ward(records, jurisdiction_filter="lga"):
     """
     Takes public-safe records (list of dicts, as returned by
     sheets_client.get_public_safe_data()) and rolls them up by ward.
+
+    jurisdiction_filter: 'lga' (default) includes only LGA-actionable
+    complaints - what a chairman/councillor can actually be held
+    accountable for. Pass 'all' to include institutional/state_federal
+    rows too, or 'institutional'/'state_federal' to see ONLY those,
+    e.g. for a separate "not the LGA's problem" view.
+
+    This split exists because a ward keyword match only tells you WHERE
+    something happened, not WHO is responsible - an ASUU strike sitting
+    in Ward 05 Iba (LASU's location) is not the LGA chairman's fault, and
+    blending it into ward accountability numbers would misattribute blame.
 
     Returns a dict shaped like:
     {
@@ -42,6 +53,9 @@ def aggregate_by_ward(records):
         ...
     }
     """
+    if jurisdiction_filter != "all":
+        records = [r for r in records if r.get("jurisdiction", "lga") == jurisdiction_filter]
+
     ward_data = defaultdict(lambda: {
         "complaint_count": 0,
         "sentiment_scores": [],
@@ -87,11 +101,18 @@ def aggregate_by_ward(records):
     return summary
 
 
-def aggregate_by_issue(records):
+def aggregate_by_issue(records, jurisdiction_filter="lga"):
     """
     Same idea, rolled up by issue instead of ward - useful for
     'what's the biggest problem across all of Ojo right now' views.
+
+    Same jurisdiction_filter default as aggregate_by_ward - without this,
+    institutional matters (e.g. LASU/ASUU) would inflate an issue's LGA-
+    wide count even though the LGA chairman has no power over them.
     """
+    if jurisdiction_filter != "all":
+        records = [r for r in records if r.get("jurisdiction", "lga") == jurisdiction_filter]
+
     issue_data = defaultdict(lambda: {"count": 0, "sentiment_scores": []})
 
     for row in records:

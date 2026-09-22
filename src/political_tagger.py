@@ -68,6 +68,39 @@ KNOWN_GROUP_NAMES = [
     "confraternity", "confra", "maphite", "kkk",
 ]
 
+# --- JURISDICTION ---
+# A ward keyword match tells you WHERE something happened, not WHO is
+# responsible for fixing it. LASU sits geographically in Ward 05 Iba, but
+# an ASUU strike or a university admission policy is not something the
+# Ojo LGA chairman can act on. Without this distinction, institutional/
+# state/federal matters silently inflate a ward's "blame the chairman"
+# numbers for things the chairman has no power over.
+
+INSTITUTIONAL_ENTITIES = [
+    "lasu", "asuu", "lasued", "lasustech", "lasu corporate affairs",
+    "students' union", "students union",
+]
+
+STATE_FEDERAL_ENTITIES = [
+    "sanwo olu", "governor lagos", "lasg", "tinubu", "president", "fg",
+    "federal government", "ministry", "ekedc", "lawma",
+    "lasbca", "commissioner", "lagos state government", "building control agency",
+]
+
+
+def _determine_jurisdiction(text_lower):
+    """
+    Returns 'lga' (default - actionable by LGA chairman/councillors),
+    'institutional' (university/school-specific, not LGA-controlled), or
+    'state_federal' (state or federal government responsibility).
+    """
+    if any(entity in text_lower for entity in INSTITUTIONAL_ENTITIES):
+        return "institutional"
+    if any(entity in text_lower for entity in STATE_FEDERAL_ENTITIES):
+        return "state_federal"
+    return "lga"
+
+
 # Ojo Wards - map keywords to ward
 OJO_WARDS = {
     "Ward 01 Ojo Town": ["ojo town", "ojo market"],
@@ -194,6 +227,9 @@ def tag_political_entities(text):
     # 5. Review-queue triage - flag unverified named accusations of violence
     needs_review, review_reason = _looks_like_named_accusation(text, text_lower)
 
+    # 6. Jurisdiction - who is actually responsible for this, not just where it happened
+    jurisdiction = _determine_jurisdiction(text_lower)
+
     return {
         "politicians": list(set(found_politicians)),
         "issues": list(set(found_issues)),
@@ -203,6 +239,7 @@ def tag_political_entities(text):
         "value": "HIGH" if is_blame else "MEDIUM" if len(found_issues) > 0 else "LOW",
         "needs_review": needs_review,
         "review_reason": review_reason,
+        "jurisdiction": jurisdiction,
     }
 
 
